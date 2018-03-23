@@ -1,0 +1,45 @@
+From 5cd19b71b82e2a33ffef40dda70cec508508381e Mon Sep 17 00:00:00 2001
+From: suker <suker@nexell.co.kr>
+Date: Fri, 23 Mar 2018 11:47:49 +0900
+Subject: [PATCH] This patch is about breakpoint not working problem.
+
+---
+ gdb/riscv-tdep.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/gdb/riscv-tdep.c b/gdb/riscv-tdep.c
+index 3c2c9e8..68adc67 100644
+--- a/gdb/riscv-tdep.c
++++ b/gdb/riscv-tdep.c
+@@ -233,12 +233,16 @@ cached_misa ()
+ static int
+ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+ {
++  // Below Error fixed "Register 3921 is not available"
++  gdbarch_tdep (gdbarch)->supports_compressed_isa = AUTO_BOOLEAN_FALSE;
++  return 4;
++/*
+   if (use_compressed_breakpoints == AUTO_BOOLEAN_AUTO) {
+     if (gdbarch_tdep (gdbarch)->supports_compressed_isa == AUTO_BOOLEAN_AUTO)
+     {
+-      /* TODO: Because we try to read misa, it is not possible to set a
+-         breakpoint before connecting to a live target. A suggested workaround is
+-         to look at the ELF file in this case.  */
++      // TODO: Because we try to read misa, it is not possible to set a
++      // breakpoint before connecting to a live target. A suggested workaround is
++      // to look at the ELF file in this case.
+       uint32_t misa = cached_misa();
+       if (misa & (1<<2))
+         gdbarch_tdep (gdbarch)->supports_compressed_isa = AUTO_BOOLEAN_TRUE;
+@@ -254,7 +258,7 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
+     return 2;
+   } else {
+     return 4;
+-  }
++  }*/
+ }
+ 
+ /* Implement the sw_breakpoint_from_kind gdbarch method.  */
+-- 
+2.7.4
+
